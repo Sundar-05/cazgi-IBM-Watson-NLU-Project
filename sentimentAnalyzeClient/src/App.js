@@ -37,56 +37,62 @@ class App extends React.Component {
       });
   } 
   
+
   sendForSentimentAnalysis = () => {
-    this.setState({sentiment:true});
+    this.setState({ sentiment: true });
     let url = ".";
-    let mode = this.state.mode
-    url = url+"/" + mode + "/sentiment?"+ mode + "="+document.getElementById("textinput").value;
+    let mode = this.state.mode;
+    url = url + "/" + mode + "/sentiment?" + mode + "=" + document.getElementById("textinput").value;
 
-    fetch(url).then((response)=>{
-        response.json().then((data)=>{
-        this.setState({sentimentOutput:data.label});
-        let output = data.label;
-        let color = "white"
-        switch(output) {
-          case "positive": color = "black";break;
-          case "negative": color = "black";break;
-          default: color = "black";
-        }
-        output = <div style={{color:color,fontSize:20}}>{output}</div>
-        this.setState({sentimentOutput:output});
-      })});
-  }
-
-  sendForEmotionAnalysis = () => {
-
-    this.setState({sentiment:false});
-    let url = ".";
-    let mode = this.state.mode
-    url = url+"/" + mode + "/emotion?"+ mode + "="+document.getElementById("textinput").value;
-
-    fetch(url).then((response)=>{
-      response.json().then((data)=>{
-      this.setState({sentimentOutput:<EmotionTable emotions={data}/>});
-  })})  ;
-  }
-  
-
-  render() {
-    return (  
-      <div className="App">
-      <button className="btn btn-info" onClick={()=>{this.renderOutput('text')}}>Text</button>
-        <button className="btn btn-dark"  onClick={()=>{this.renderOutput('url')}}>URL</button>
-        <br/><br/>
-        {this.state.innercomp}
-        <br/>
-        <button className="btn-primary" onClick={this.sendForSentimentAnalysis}>Analyze Sentiment</button>
-        <button className="btn-primary" onClick={this.sendForEmotionAnalysis}>Analyze Emotion</button>
-        <br/>
-            {this.state.sentimentOutput}
-      </div>
-    );
-    }
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(error => { throw new Error(error.details); });
+            }
+            return response.json();
+        })
+        .then(data => {
+            let output = data.label;
+            let color = "white";
+            switch (output) {
+                case "positive": color = "green"; break;
+                case "negative": color = "red"; break;
+                default: color = "yellow";
+            }
+            output = <div style={{ color: color, fontSize: 20 }}>{output}</div>;
+            this.setState({ sentimentOutput: output });
+        })
+        .catch(error => {
+            console.error('There has been a problem with your fetch operation:', error);
+            this.setState({ sentimentOutput: <div style={{ color: "red", fontSize: 20 }}>Error: {error.message}</div> });
+        });
 }
 
+sendForEmotionAnalysis = () => {
+    this.setState({ sentiment: false });
+    let url = ".";
+    let mode = this.state.mode;
+    url = url + "/" + mode + "/emotion?" + mode + "=" + document.getElementById("textinput").value;
+
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(error => { throw new Error(error.details); });
+            }
+            return response.json();
+        })
+        .then(data => {
+            this.setState({ sentimentOutput: <EmotionTable emotions={data} /> });
+        })
+        .catch(error => {
+            console.error('There has been a problem with your fetch operation:', error);
+            this.setState({ sentimentOutput: <div style={{ color: "red", fontSize: 20 }}>Error: {error.message}</div> });
+        });
+}
+
+
+
+
+}
+  
 export default App;
